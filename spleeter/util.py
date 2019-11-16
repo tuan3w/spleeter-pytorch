@@ -9,8 +9,6 @@ def tf2pytorch(checkpoint_path, num_instrumments):
     init_vars = tf.train.list_variables(checkpoint_path)
     # print(init_vars)
     for name, shape in init_vars:
-        if len(shape) == 0:
-            continue
         try:
             # print('Loading TF Weight {} with shape {}'.format(name, shape))
             data = tf.train.load_variable(checkpoint_path, name)

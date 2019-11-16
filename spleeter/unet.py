@@ -8,7 +8,7 @@ def down_block(in_filters, out_filters):
                   stride=2, padding=2,
                   ),
         nn.BatchNorm2d(out_filters, track_running_stats=True),
-        nn.LeakyReLU()
+        nn.LeakyReLU(0.3)
     )
 
 
@@ -17,7 +17,7 @@ def up_block(in_filters, out_filters, dropout=False):
         nn.ConvTranspose2d(in_filters, out_filters, kernel_size=5,
                            stride=2, padding=2, output_padding=1
                            ),
-        nn.ReLU(0.2),
+        nn.ReLU(),
         nn.BatchNorm2d(out_filters, track_running_stats=True)
     ]
     if dropout:
@@ -48,7 +48,6 @@ class UNet(nn.Module):
         )
 
     def forward(self, x):
-        # import pdb; pdb.set_trace()
         d1 = self.down1(x)
         d2 = self.down2(d1)
         d3 = self.down3(d2)
@@ -63,8 +62,7 @@ class UNet(nn.Module):
         u5 = self.up5(torch.cat([d2, u4], axis=1))
         u6 = self.up6(torch.cat([d1, u5], axis=1))
         u7 = self.up7(u6)
-
-        return u7
+        return u7 * x
 
 
 if __name__ == '__main__':
