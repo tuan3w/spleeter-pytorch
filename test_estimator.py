@@ -15,6 +15,6 @@ wav_torch = wav / (wav.max() + 1e-8)
 
 wavs = es.separate(wav_torch)
 for i in range(len(wavs)):
-    fname = 'out_{}.wav'.format(i)
+    fname = 'output/out_{}.wav'.format(i)
     print('Writing ',fname)
     write_wav(fname, wavs[i].squeeze().numpy(), sr)
