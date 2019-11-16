@@ -1,27 +1,15 @@
 # spleeter-pytorch
 Spleeter implementation in pytorch
 
-
 ## Usage
 
-```python
-from spleeter.estimator import Estimator
-import torchaudio
-from librosa.core import load
-from librosa.output import write_wav
-import torch
+See [example](./test_estimator.py) for the usage how to use.
 
-es = Estimator(2, './checkpoints/model')
 
-wav, sr = torchaudio.load_wav('./audio_example.mp3')
-# import pdb; pdb.set_trace()
-wav_torch = wav / (wav.max() + 1e-8)
-print(wav_torch.min(), )
-wavs = es.separate(wav_torch)
-for i in range(len(wavs)):
-    fname = 'out_{}.wav'.format(i)
-    print('Writing ',fname)
-    write_wav(fname, wavs[i].squeeze().numpy(), sr)
-```
+## Note
+* I only tested with 2stems model, not sure if it works for other models.
+* There might be some bugs, the quality of output isn't as good as origin. If someone found the reason, please to send me a merge request.
 
-Note: There are some bugs in code, I can't figure out the reason it doesnt work well as origin repo. If someone can figure out the problem, please send me a merge request. Thanks.
+## License
+
+**MIT**.
