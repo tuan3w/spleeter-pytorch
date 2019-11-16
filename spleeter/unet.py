@@ -7,7 +7,7 @@ def down_block(in_filters, out_filters):
         nn.Conv2d(in_filters, out_filters, kernel_size=5,
                   stride=2, padding=2,
                   ),
-        nn.BatchNorm2d(out_filters, track_running_stats=False),
+        nn.BatchNorm2d(out_filters, track_running_stats=True),
         nn.LeakyReLU()
     )
 
@@ -18,7 +18,7 @@ def up_block(in_filters, out_filters, dropout=False):
                            stride=2, padding=2, output_padding=1
                            ),
         nn.ReLU(0.2),
-        nn.BatchNorm2d(out_filters, track_running_stats=False)
+        nn.BatchNorm2d(out_filters, track_running_stats=True)
     ]
     if dropout:
         layers.append(nn.Dropout(0.5))
@@ -43,10 +43,12 @@ class UNet(nn.Module):
         self.up5 = up_block(64, 16)
         self.up6 = up_block(32, 1)
         self.up7 = nn.Sequential(
-            nn.Conv2d(1, 2, kernel_size=4, dilation=2)
+            nn.Conv2d(1, 2, kernel_size=4, dilation=2, padding=3),
+            nn.Sigmoid()
         )
 
     def forward(self, x):
+        # import pdb; pdb.set_trace()
         d1 = self.down1(x)
         d2 = self.down2(d1)
         d3 = self.down3(d2)
@@ -62,7 +64,7 @@ class UNet(nn.Module):
         u6 = self.up6(torch.cat([d1, u5], axis=1))
         u7 = self.up7(u6)
 
-        return u7 * x
+        return u7
 
 
 if __name__ == '__main__':

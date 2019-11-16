@@ -38,6 +38,7 @@ def tf2pytorch(checkpoint_path, num_instrumments):
 
             output['down{}.0.weight'.format(j)] = np.transpose(
                 tf_vars["conv2d{}/kernel".format(conv_suffix)], (3, 2, 0, 1))
+            # print('conv dtype: ',output['down{}.0.weight'.format(j)].dtype)
             output['down{}.0.bias'.format(
                 j)] = tf_vars["conv2d{}/bias".format(conv_suffix)]
 
@@ -80,12 +81,13 @@ def tf2pytorch(checkpoint_path, num_instrumments):
             tconv_idx += 1
             bn_idx += 1
 
-        if tconv_idx == 0:
+        if conv_idx == 0:
             suffix = ""
         else:
-            suffix = "_" + str(tconv_idx)
+            suffix = "_" + str(conv_idx)
         output['up7.0.weight'] = np.transpose(
             tf_vars['conv2d{}/kernel'.format(suffix)], (3, 2, 0, 1))
         output['up7.0.bias'] = tf_vars['conv2d{}/bias'.format(suffix)]
+        conv_idx += 1
 
     return outputs
