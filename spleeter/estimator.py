@@ -111,6 +111,8 @@ class Estimator(nn.Module):
         stft_mag = pad_and_partition(stft_mag, self.T)  # B x 2 x F x T
         stft_mag = stft_mag.transpose(2, 3)  # B x 2 x T x F
 
+        B = stft_mag.shape[0]
+
         # compute instruments' mask
         masks = []
         for net in self.instruments:
@@ -124,14 +126,15 @@ class Estimator(nn.Module):
         wavs = []
         for mask in masks:
             mask = (mask ** 2 + 1e-10/2)/(mask_sum)
+            mask = mask.transpose(2, 3)  # B x 2 X F x T
 
-            mask = mask.permute([0, 3, 2, 1])[
-                :, :, :L, 0].unsqueeze(-1)
+            mask = torch.cat(
+                torch.split(mask, 1, dim=0), dim=3)
 
-            stft_masked = stft * mask
-            stft_reshaped = torch.cat(
-                torch.split(stft_masked, 2, dim=0), dim=2)
-            wav_masked = self.inverse_stft(stft_reshaped)
+            mask = mask.squeeze(0)[:,:,:L].unsqueeze(-1) # 2 x F x L x 1
+            stft_masked = stft *  mask
+            wav_masked = self.inverse_stft(stft_masked)
+
             wavs.append(wav_masked)
 
         return wavs
