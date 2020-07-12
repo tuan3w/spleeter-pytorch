@@ -2,6 +2,7 @@ import torch
 import torchaudio
 from librosa.core import load
 from librosa.output import write_wav
+import numpy as np
 
 from spleeter.estimator import Estimator
 
@@ -17,4 +18,4 @@ wavs = es.separate(wav_torch)
 for i in range(len(wavs)):
     fname = 'output/out_{}.wav'.format(i)
     print('Writing ',fname)
-    write_wav(fname, wavs[i].squeeze().numpy(), sr)
+    write_wav(fname, np.asfortranarray(wavs[i].squeeze().numpy()), sr)
