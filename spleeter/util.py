@@ -1,8 +1,6 @@
 import numpy as np
 import tensorflow as tf
 
-from .unet import UNet
-
 
 def tf2pytorch(checkpoint_path, num_instrumments):
     tf_vars = {}
