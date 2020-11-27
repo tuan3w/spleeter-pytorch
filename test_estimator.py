@@ -1,21 +1,29 @@
-import torch
 import torchaudio
-from librosa.core import load
-from librosa.output import write_wav
-import numpy as np
+import soundfile as sf
 
 from spleeter.estimator import Estimator
+import os
+
 
 es = Estimator(2, './checkpoints/2stems/model')
 
-# load wav audio
-wav, sr = torchaudio.load_wav('./audio_example.mp3')
 
-# normalize audio 
-wav_torch = wav / (wav.max() + 1e-8)
+def main(original_audio='./audio_example.mp3', out_dir='./output'):
+    # load wav audio
+    wav, sr = torchaudio.load(original_audio)
 
-wavs = es.separate(wav_torch)
-for i in range(len(wavs)):
-    fname = 'output/out_{}.wav'.format(i)
-    print('Writing ',fname)
-    write_wav(fname, np.asfortranarray(wavs[i].squeeze().numpy()), sr)
+    # normalize audio
+    wav_torch = wav / (wav.max() + 1e-8)
+
+    wavs = es.separate(wav_torch)
+    for i in range(len(wavs)):
+        fname = os.path.join(out_dir, f'out_{i}.wav')
+        print('Writing:', fname)
+        new_wav = wavs[i].squeeze()
+        new_wav = new_wav.permute(1, 0)
+        new_wav = new_wav.numpy()
+        sf.write(fname, new_wav, sr)
+
+
+if __name__ == '__main__':
+    main()

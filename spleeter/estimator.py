@@ -3,7 +3,7 @@ import math
 import torch
 import torch.nn.functional as F
 from torch import nn
-from torchaudio.functional import istft
+# from torchaudio.functional import istft
 
 from .unet import UNet
 from .util import tf2pytorch
@@ -88,7 +88,7 @@ class Estimator(nn.Module):
 
         pad = self.win_length // 2 + 1 - stft.size(1)
         stft = F.pad(stft, (0, 0, 0, 0, 0, pad))
-        wav = istft(stft, self.win_length, hop_length=self.hop_length,
+        wav = torch.istft(stft, self.win_length, hop_length=self.hop_length,
                     window=self.win)
         return wav.detach()
 
