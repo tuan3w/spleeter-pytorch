@@ -1,6 +1,10 @@
 # spleeter-pytorch
 Spleeter implementation in pytorch.
 
+## Requirements
+
+To install requirements, run `pip install -r requirements.txt`
+
 ## Usage
 
 See [example](run_estimator.py) for the usage how to use.
