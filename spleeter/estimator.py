@@ -3,7 +3,6 @@ import math
 import torch
 import torch.nn.functional as F
 from torch import nn
-# from torchaudio.functional import istft
 
 from .unet import UNet
 from .util import tf2pytorch
