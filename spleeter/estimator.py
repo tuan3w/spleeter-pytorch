@@ -3,7 +3,7 @@ import math
 import torch
 import torch.nn.functional as F
 from torch import nn
-from torchaudio.functional import istft
+# from torchaudio.functional import istft
 
 from .unet import UNet
 from .util import tf2pytorch
@@ -50,7 +50,10 @@ class Estimator(nn.Module):
         self.T = 512
         self.win_length = 4096
         self.hop_length = 1024
-        self.win = torch.hann_window(self.win_length)
+        self.win = nn.Parameter(
+            torch.hann_window(self.win_length),
+            requires_grad=False
+        )
 
         ckpts = tf2pytorch(checkpoint_path, num_instrumments)
 
@@ -72,8 +75,8 @@ class Estimator(nn.Module):
             wav (Tensor): B x L
         """
 
-        stft = torch.stft(
-            wav, self.win_length, hop_length=self.hop_length, window=self.win)
+        stft = torch.stft(wav, n_fft=self.win_length, hop_length=self.hop_length, window=self.win,
+                          center=True, return_complex=False, pad_mode='constant')
 
         # only keep freqs smaller than self.F
         stft = stft[:, :self.F, :, :]
@@ -88,7 +91,7 @@ class Estimator(nn.Module):
 
         pad = self.win_length // 2 + 1 - stft.size(1)
         stft = F.pad(stft, (0, 0, 0, 0, 0, pad))
-        wav = istft(stft, self.win_length, hop_length=self.hop_length,
+        wav = torch.istft(stft, self.win_length, hop_length=self.hop_length, center=True,
                     window=self.win)
         return wav.detach()
 

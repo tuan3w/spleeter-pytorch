@@ -34,10 +34,10 @@ def tf2pytorch(checkpoint_path, num_instrumments):
             else:
                 bn_suffix = "_" + str(bn_idx)
 
-            output['down{}_conv.weight'.format(j)] = np.transpose(
+            output['down{}_conv.1.weight'.format(j)] = np.transpose(
                 tf_vars["conv2d{}/kernel".format(conv_suffix)], (3, 2, 0, 1))
             # print('conv dtype: ',output['down{}.0.weight'.format(j)].dtype)
-            output['down{}_conv.bias'.format(
+            output['down{}_conv.1.bias'.format(
                 j)] = tf_vars["conv2d{}/bias".format(conv_suffix)]
 
             output['down{}_act.0.weight'.format(
@@ -68,13 +68,13 @@ def tf2pytorch(checkpoint_path, num_instrumments):
                 tf_vars["conv2d_transpose{}/kernel".format(tconv_suffix)], (3,2,0, 1))
             output['up{}.0.bias'.format(
                 j)] = tf_vars["conv2d_transpose{}/bias".format(tconv_suffix)]
-            output['up{}.2.weight'.format(
+            output['up{}.3.weight'.format(
                 j)] = tf_vars["batch_normalization{}/gamma".format(bn_suffix)]
-            output['up{}.2.bias'.format(
+            output['up{}.3.bias'.format(
                 j)] = tf_vars["batch_normalization{}/beta".format(bn_suffix)]
-            output['up{}.2.running_mean'.format(
+            output['up{}.3.running_mean'.format(
                 j)] = tf_vars['batch_normalization{}/moving_mean'.format(bn_suffix)]
-            output['up{}.2.running_var'.format(
+            output['up{}.3.running_var'.format(
                 j)] = tf_vars['batch_normalization{}/moving_variance'.format(bn_suffix)]
             tconv_idx += 1
             bn_idx += 1

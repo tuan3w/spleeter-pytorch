@@ -1,21 +1,38 @@
 import torch
 from torch import nn
+import torch.nn.functional as F
+
+class CustomPad(nn.Module):
+    def __init__(self, padding_setting=(1, 2, 1, 2)):
+        super(CustomPad, self).__init__()
+        self.padding_setting = padding_setting
+
+    def forward(self, x):
+        return F.pad(x, self.padding_setting, "constant", 0)
+
+
+class CustomTransposedPad(nn.Module):
+    def __init__(self, padding_setting=(1, 2, 1, 2)):
+        super(CustomTransposedPad, self).__init__()
+        self.padding_setting = padding_setting
+
+    def forward(self, x):
+        l,r,t,b = self.padding_setting
+        return x[:,:,l:-r,t:-b]
 
 
 def down_block(in_filters, out_filters):
-    return nn.Conv2d(in_filters, out_filters, kernel_size=5,
-                     stride=2, padding=2,
-                     ), nn.Sequential(
-        nn.BatchNorm2d(out_filters, track_running_stats=True, eps=1e-3, momentum=0.01),
-        nn.LeakyReLU(0.2)
-    )
+    return nn.Sequential(CustomPad(),
+                         nn.Conv2d(in_filters, out_filters, kernel_size=5, stride=2,padding=0)), \
+           nn.Sequential(
+               nn.BatchNorm2d(out_filters, track_running_stats=True, eps=1e-3, momentum=0.01),
+               nn.LeakyReLU(0.2))
 
 
 def up_block(in_filters, out_filters, dropout=False):
     layers = [
-        nn.ConvTranspose2d(in_filters, out_filters, kernel_size=5,
-                           stride=2, padding=2, output_padding=1
-                           ),
+        nn.ConvTranspose2d(in_filters, out_filters, kernel_size=5,stride=2),
+        CustomTransposedPad(),
         nn.ReLU(),
         nn.BatchNorm2d(out_filters, track_running_stats=True, eps=1e-3, momentum=0.01)
     ]
@@ -42,7 +59,7 @@ class UNet(nn.Module):
         self.up5 = up_block(64, 16)
         self.up6 = up_block(32, 1)
         self.up7 = nn.Sequential(
-            nn.Conv2d(1, 2, kernel_size=4, dilation=2, padding=3),
+            nn.Conv2d(1, in_channels, kernel_size=4, dilation=2, padding=3),
             nn.Sigmoid()
         )
 
@@ -65,7 +82,7 @@ class UNet(nn.Module):
         d6_conv = self.down6_conv(d5)
         d6 = self.down6_act(d6_conv)
 
-        u1 = self.up1(d6)
+        u1 = self.up1(d6_conv)
         u2 = self.up2(torch.cat([d5_conv, u1], axis=1))
         u3 = self.up3(torch.cat([d4_conv, u2], axis=1))
         u4 = self.up4(torch.cat([d3_conv, u3], axis=1))
